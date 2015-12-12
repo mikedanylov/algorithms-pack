@@ -7,18 +7,20 @@
 <body>
   <script type="text/javascript">
 
-    function titleCase(str) {
-      // lowercase the whole string first
-      // then replace any non-whitespace char (\S) with its capitalized copy
-      // which is the begining of a string (^)
-      // or right after a whitespace char (\s)
-      return str.toLowerCase().replace(/(?:^|\s)\S/g, function(letter) {
-        return letter.toUpperCase();
+    function destroyer(arr) {
+      var filtered, i, args = Array.prototype.slice.call(arguments, 1);
+      filtered = arr.filter(function(elem) {
+        for (i = 0; i < args.length; i++) {
+          if (elem === args[i]) {
+            return false;
+          }
+        }
+        return true;
       });
+      return filtered;
     }
-    
-    var str = titleCase("I'm a little tea pot");
-    console.log(str);
+
+    destroyer([1, 2, 3, 1, 2, 3], 2, 3);
 
   </script>
 </body>
