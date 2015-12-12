@@ -7,21 +7,22 @@
 <body>
   <script type="text/javascript">
 
-    function destroyer(arr) {
-      var filtered, i, args = Array.prototype.slice.call(arguments, 1);
-      filtered = arr.filter(function(elem) {
-        for (i = 0; i < args.length; i++) {
-          if (elem === args[i]) {
-            return false;
-          }
-        }
-        return true;
+    function where(arr, num) {
+      var i = 0;
+      arr = arr.sort(function(a, b) {
+        return a > b ? true : false;
       });
-      return filtered;
+      console.log(arr);
+      console.log(num);
+      while (num > arr[i]) {
+        i++;
+      }
+      console.log(i);
+      return i;
     }
 
-    destroyer([1, 2, 3, 1, 2, 3], 2, 3);
-
+    var w = where([3, 5, 10, 3], 5);
+    console.log(w);
   </script>
 </body>
 </html>
