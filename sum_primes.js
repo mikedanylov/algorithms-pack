@@ -10,11 +10,11 @@ The provided number may not be a prime.
 
 function sumPrimes(num) {
   var primes_sum = 0, i, j;
-  if (num == 1) { return 1 }
+  if (num == 1) { return 1; }
   for (i = 2; i <= num; i++) {
     primes_sum += i;
     for (j = 2; j < i; j++) {
-      if (i % j == 0) {
+      if (i % j === 0) {
         primes_sum -= i;
         break;
       }
