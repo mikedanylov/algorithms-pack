@@ -10,18 +10,18 @@ As an example, passing 4 to the function should return 5 because all the odd Fib
 
 function sumFibs(num) {
   
-  var nums_arr = [0, 1], i, odd_sum = 1;
+  var nums_arr = [0, 1], i, odd_sum = 1, new_val = 0;
   
   if (num < 2) {
     return num;
   } else {
-    for (i = 2; i <= num; i++) {
-      nums_arr.push(nums_arr[i - 1] + nums_arr[i - 2]);
-      if ((nums_arr[i - 1] + nums_arr[i - 2]) % 2 !== 0) {
-        odd_sum += nums_arr[i - 1] + nums_arr[i - 2];
+    for (i = 2; new_val < num; i++) {
+      new_val = nums_arr[i - 1] + nums_arr[i - 2];
+      nums_arr.push(new_val);
+      if (new_val % 2 !== 0 && new_val <= num) {
+        odd_sum += new_val;
       }
     }
-    // console.log(nums_arr);
     return odd_sum;
   }
 }
@@ -31,13 +31,21 @@ console.log(
 );
 
 console.log(
-  sumFibs(2)
+  sumFibs(4)
 );
 
 console.log(
-  sumFibs(10)
+  sumFibs(1000)
 );
 
 console.log(
-  sumFibs(77) // max int
+  sumFibs(4000000)
+);
+
+console.log(
+  sumFibs(75024)
+);
+
+console.log(
+  sumFibs(75025)
 );
