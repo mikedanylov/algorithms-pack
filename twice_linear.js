@@ -11,64 +11,47 @@ Ex: u = [1, 3, 4, 7, 9, 10, 13, 15, 19, 21, 22, 27, ...]
 
 Task:
 
-Given parameter n the function dbl_linear (or dblLinear...) returns the element u(n) of the ordered (with <=) sequence u.
+Given parameter n the function dblLinear (or dblLinear...) returns the element u(n) of the ordered (with <=) sequence u.
 
 Example:
 
-dbl_linear(10) should return 22
+dblLinear(10) should return 22
 
  */
 
-function dbl_linear(n) {
+function dblLinear(n) {
   
   var main_arr = [],
       tmp_arr = [1],
-      // tmp_arr = new Array(1000),
-      new_elem, y, z;
+      new_elem, i;
 
   while(!main_arr[n]) {
-
-    // console.log('main_arr: ' + main_arr);
-    // console.log('tmp_arr: ' + tmp_arr);
-    // console.log('new_elem: ' + new_elem);
     
-    new_elem = Math.min.apply(null, tmp_arr);
-    y = 2 * new_elem + 1;
-    if (tmp_arr.indexOf(y) == -1) {
-      tmp_arr.push(y);  
+    new_elem = tmp_arr[0];
+    for (i = 0; i < tmp_arr.length; i++) {
+      if (tmp_arr[i] < new_elem && tmp_arr[i]) { new_elem = tmp_arr[i] };
     }
-    z = 3 * new_elem + 1;
-    if (tmp_arr.indexOf(z) == -1) {
-      tmp_arr.push(z);
-    }
-
-    // console.log('main_arr: ' + main_arr);
-    // console.log('tmp_arr: ' + tmp_arr);
-    // console.log('new_elem: ' + new_elem);
-    
+    tmp_arr.indexOf(2 * new_elem + 1) === -1 ? tmp_arr.push(2 * new_elem + 1): undefined;
+    tmp_arr.indexOf(3 * new_elem + 1) === -1 ? tmp_arr.push(3 * new_elem + 1): undefined;
     main_arr.push(new_elem);
     tmp_arr.splice(tmp_arr.indexOf(new_elem), 1);
-
-    // console.log('main_arr: ' + main_arr);
-    // console.log('tmp_arr: ' + tmp_arr);
-    // console.log('new_elem: ' + new_elem);
-
-    // break;
   }
   return main_arr[n];
 }
 
+// code still times out on Codewars but I couldn't
+// figure out how to get lower than 180ms for all tests
 var start = new Date().getTime();
 
-console.log(dbl_linear(10)); // 22
-console.log(dbl_linear(20)); // 57
-console.log(dbl_linear(30)); // 91
-console.log(dbl_linear(50)); // 175
-console.log(dbl_linear(100)); // 447
-console.log(dbl_linear(500)); // 3355
-console.log(dbl_linear(1000)); // 8488
-console.log(dbl_linear(2000)); // 19773
-console.log(dbl_linear(6000)); // 80914
+console.log(dblLinear(10)); // 22
+console.log(dblLinear(20)); // 57
+console.log(dblLinear(30)); // 91
+console.log(dblLinear(50)); // 175
+console.log(dblLinear(100)); // 447
+console.log(dblLinear(500)); // 3355
+console.log(dblLinear(1000)); // 8488
+console.log(dblLinear(2000)); // 19773
+console.log(dblLinear(6000)); // 80914
 
 var end = new Date().getTime();
 var time = end - start;
