@@ -34,59 +34,33 @@ function matchBrackets(inputText) {
             } else {
                 if (openingBracketsStack.length === 0 &&
                     (isOpeningBracket(inputText[i]) || isClosingBracket(inputText[i]))) {
-                    console.log("Stack is empty");
-                    var mismatchPosition = i + 1;
-                    throw new Error("\"" + inputText[i] + "\"" +
-                        ' bracket mismatch at position ' + mismatchPosition);
+                    return i + 1;
                 } else if (isClosingBracket(inputText[i])) {
                     var stackTop = openingBracketsStack.pop();
                     if (!stackTop.match(inputText[i]) && !/[A-Za-z0-9]/.test(inputText[i])) {
-                        openingBracketsStack = [];
-                        var mismatchPosition = stackTop.position + 2;
-                        throw new Error("\"" + stackTop.bracketType + "\"" +
-                            ' bracket mismatch at position ' + mismatchPosition);
+                        return i + 1;
                     }
                 }
             }
         }
         if (openingBracketsStack.length === 0) {
-            return 'Brackets match!';
+            return 'Success';
         } else {
             var lastInStack = (openingBracketsStack[openingBracketsStack.length - 1]);
-            var mismatchPosition = lastInStack.position + 1;
-            throw new Error("\"" + lastInStack.bracketType + "\"" +
-                ' bracket mismatch at position ' + mismatchPosition);
+            return lastInStack.position + 1;
         }
     } else {
         return false;
     }
 }
 
-// matchBrackets("[]");
-// matchBrackets("{}");
-// matchBrackets("()");
-// matchBrackets("{}[]");
-// matchBrackets("{}()");
-// matchBrackets("[]()");
-// matchBrackets("[][]");
-// matchBrackets("[()]");
-// matchBrackets("(())");
-// matchBrackets("{{}}");
-// matchBrackets("{}[]{}");
-// matchBrackets("{[]}()");
-// matchBrackets("[{{}}]");
+process.stdin.setEncoding('utf8');
 
-// matchBrackets("{");
-// matchBrackets("}");
-// matchBrackets("[");
-// matchBrackets("]");
-// matchBrackets("(");
-// matchBrackets(")");
-// matchBrackets("}()");
-// matchBrackets("{[}");
-// matchBrackets("[(]");
-// matchBrackets("(){[}");
-// matchBrackets("{}{}]");
-
-// matchBrackets("ablabla)ihihi(ohoho");
-matchBrackets("[very(strong]test)");
+process.stdin.on('readable', () => {
+    var chunk = process.stdin.read();
+    if (chunk !== null) {
+        var result = matchBrackets(chunk);
+        process.stdout.write(String(result) + "\n");
+        process.exit();
+    }
+});
