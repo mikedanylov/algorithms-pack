@@ -8,26 +8,23 @@ function getTreeHeight(str) {
 
     // loop over all nodes in the tree
     for (var i = 0; i < arr.length; i++) {
-        if (arr[i] === -1) {
-            heights.push(1);
-            continue;
-        }
+        currDepth = 1;
 
-         currDepth = 1;
         // find distance to root for each node
-        tmp = i; // node index
-        while (tmp !== -1) { // while not a root node
-            tmp = arr[tmp];
-            if (heights[tmp]) {
-                currDepth += heights[tmp];
-                if (currDepth > maxDepth) {
-                    maxDepth = currDepth;
-                }
+        indexValueLink = i; // node index
+        while (indexValueLink !== -1) { // while not a root node
+
+            if ((indexValueLink = arr[indexValueLink]) === -1) {
                 break;
             }
-            if (tmp !== -1) {
+
+            if (heights[indexValueLink]) { // use cached node depth
+                currDepth += heights[indexValueLink];
+                indexValueLink = -1; // root is reached
+            } else {
                 currDepth++;
             }
+
             if (currDepth > maxDepth) {
                 maxDepth = currDepth;
             }
@@ -42,9 +39,9 @@ function getTreeHeight(str) {
 
 var readline = require('readline');
 var rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-  terminal: false
+    input: process.stdin,
+    output: process.stdout,
+    terminal: false
 });
 var lineNum = 1;
 

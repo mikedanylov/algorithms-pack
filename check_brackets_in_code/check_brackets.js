@@ -37,7 +37,7 @@ function matchBrackets(inputText) {
                     return i + 1;
                 } else if (isClosingBracket(inputText[i])) {
                     var stackTop = openingBracketsStack.pop();
-                    if (!stackTop.match(inputText[i]) && !/[A-Za-z0-9]/.test(inputText[i])) {
+                    if (!stackTop.match(inputText[i]) && !/^[^\[\{\(\]\}\)]*$/.test(inputText[i])) {
                         return i + 1;
                     }
                 }
@@ -46,7 +46,7 @@ function matchBrackets(inputText) {
         if (openingBracketsStack.length === 0) {
             return 'Success';
         } else {
-            var lastInStack = (openingBracketsStack[openingBracketsStack.length - 1]);
+            var lastInStack = openingBracketsStack.pop();
             return lastInStack.position + 1;
         }
     } else {
@@ -54,13 +54,14 @@ function matchBrackets(inputText) {
     }
 }
 
-process.stdin.setEncoding('utf8');
-
-process.stdin.on('readable', () => {
-    var chunk = process.stdin.read();
-    if (chunk !== null) {
-        var result = matchBrackets(chunk);
-        process.stdout.write(String(result) + "\n");
-        process.exit();
-    }
+var readline = require('readline');
+var rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+    terminal: false
 });
+
+rl.on('line', function(line){
+    console.log(matchBrackets(line));
+    process.exit();
+})
