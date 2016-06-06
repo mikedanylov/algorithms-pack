@@ -21,7 +21,7 @@ Heap.prototype.siftDown = function (index) {
     var leftChild = this.leftChild(index);
     var rightChild = this.rightChild(index);
     var arr = this.array;
-    var len = this.array.length;
+    var len = this.size;
 
     if (leftChild <= len && arr[leftChild - 1] < arr[maxIndex - 1]) {
         maxIndex = leftChild;
@@ -53,7 +53,25 @@ Heap.prototype.rightChild = function (index) {
     return 2 * index + 1;
 };
 
-var heap = new Heap([5, 4, 3, 2, 1]);
-console.log(heap);
-var heap2 = new Heap([1, 2, 3, 4, 5]);
-console.log(heap2);
+// var heap = new Heap([5, 4, 3, 2, 1]);
+// console.log(heap);
+// var heap2 = new Heap([1, 2, 3, 4, 5]);
+// console.log(heap2);
+
+var readline = require('readline');
+var rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+    terminal: false
+});
+var lineNum = 1;
+var heap;
+
+rl.on('line', function(line){
+    if (lineNum !== 1) {
+        heap = new Heap(line.split(' '));
+        console.log(heap.swapCount);
+        process.exit();
+    }
+    lineNum++;
+})
