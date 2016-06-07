@@ -2,6 +2,7 @@ function Heap(array) {
     if (array && array.length) {
         this.array = array;
         this.swapCount = 0;
+        this.swapsList = [];
         this.buildHeap(array);
     } else {
         throw new Error('Heap: should have Array parameter');
@@ -33,6 +34,7 @@ Heap.prototype.siftDown = function (index) {
 
     if (index !== maxIndex) {
         var tmp = arr[index - 1];
+        this.swapsList.push((index - 1) + ' ' + (maxIndex - 1));
 
         this.swapCount += 1;
         arr[index - 1] = arr[maxIndex - 1];
@@ -71,6 +73,9 @@ rl.on('line', function(line){
     if (lineNum !== 1) {
         heap = new Heap(line.split(' '));
         console.log(heap.swapCount);
+        heap.swapsList.forEach(function(swapPair) {
+            console.log(swapPair);
+        });
         process.exit();
     }
     lineNum++;
