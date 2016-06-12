@@ -179,43 +179,39 @@ JobQueue.prototype.printLogsStdout = function () {
     });
 }
 
-// TESTING ########################################################################################
+JobQueue.prototype.startWork = function () {
+    var jobs = this.jobs;
+    var queue = this;
 
-// var jobs = [1, 2, 3, 4, 5];
-// var queue = new JobQueue(2, jobs);
+    for (var i = 0; i < jobs.length; i++) {
 
-var jobs = [1, 2, 3, 4, 5, 6, 7, 8];
-var queue = new JobQueue(3, jobs);
-
-// var jobs = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
-// var queue = new JobQueue(4, jobs);
-
-for (var i = 0; i < jobs.length; i++) {
-
-    if (jobs[i] === 0) {
-        continue;
-    }
-
-    if (queue.isBusy()) {
-        queue.waitNextReady();
-        while (queue.isJobCompleted()) {
-            queue.releaseThread();
+        if (jobs[i] === 0) {
+            continue;
         }
-    }
 
-    while (queue.isThreadAvailable()) {
-
-        for (var j = i; j < jobs.length; j++) {
-            if (jobs[j] && queue.isThreadAvailable()) {
-                queue.assignJob(j);
-                jobs[j] = 0;
-            } else {
-                break;
+        if (queue.isBusy()) {
+            queue.waitNextReady();
+            while (queue.isJobCompleted()) {
+                queue.releaseThread();
             }
         }
-    }
 
-    queue.incrementTimer(1);
+        while (queue.isThreadAvailable()) {
+            for (var j = i; j < jobs.length; j++) {
+                if (jobs[j] && queue.isThreadAvailable()) {
+                    queue.assignJob(j);
+                    jobs[j] = 0;
+                } else {
+                    break;
+                }
+            }
+        }
+
+        queue.incrementTimer(1);
+    }
 }
 
+// TESTING ########################################################################################
+
+queue.startWork();
 queue.printLogsStdout();
