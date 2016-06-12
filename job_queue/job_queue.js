@@ -6,12 +6,12 @@ function JobQueue(nThreads, jobsArr) {
         busy: []
     },
     this.tick = 0;
+    this.logs = [];
 
     for (var i = 0; i < nThreads; i++) {
         this.threads.free.push({
             number: i,
-            index: i,
-            jobsDone: [] // indexes of jobs done
+            index: i
         });
     }
 }
@@ -20,13 +20,11 @@ JobQueue.prototype.assignJob = function (jobIndex) {
     var thread = this._popThread('free');
 
     if (thread) {
-        thread.jobsDone.push(jobIndex);
         thread.currentJob = {
             index: jobIndex,
             startingTick: this.tick,
             endingTick: this.tick + this.jobs[jobIndex]
         }
-
         this._pushThread('busy', thread);
     }
 };
@@ -38,9 +36,10 @@ JobQueue.prototype.releaseThread = function () {
 JobQueue.prototype._pushThread = function (type, thread) {
     if (type === 'busy') {
         this.threads.busy.push(thread);
-
-        console.log(thread.number, this.tick);
-
+        this.logs.push({
+            thread: thread.number,
+            startTime: this.tick
+        });
         this._siftUpBusy(this.threads.busy.length - 1);
     } else if (type === 'free') {
         thread.index = this.threads.free.length;
@@ -174,13 +173,19 @@ JobQueue.prototype.waitNextReady = function () {
     }
 }
 
+JobQueue.prototype.printLogsStdout = function () {
+    this.logs.forEach(function (entry) {
+        console.log(entry.thread + ' ' + entry.startTime);
+    });
+}
+
 // TESTING ########################################################################################
 
 // var jobs = [1, 2, 3, 4, 5];
 // var queue = new JobQueue(2, jobs);
 
-// var jobs = [1, 2, 3, 4, 5, 6, 7, 8];
-// var queue = new JobQueue(3, jobs);
+var jobs = [1, 2, 3, 4, 5, 6, 7, 8];
+var queue = new JobQueue(3, jobs);
 
 // var jobs = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
 // var queue = new JobQueue(4, jobs);
@@ -199,6 +204,7 @@ for (var i = 0; i < jobs.length; i++) {
     }
 
     while (queue.isThreadAvailable()) {
+
         for (var j = i; j < jobs.length; j++) {
             if (jobs[j] && queue.isThreadAvailable()) {
                 queue.assignJob(j);
@@ -211,3 +217,5 @@ for (var i = 0; i < jobs.length; i++) {
 
     queue.incrementTimer(1);
 }
+
+queue.printLogsStdout();
