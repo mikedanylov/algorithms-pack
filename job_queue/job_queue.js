@@ -11,7 +11,7 @@ function JobQueue(nThreads, jobsArr) {
         this.threads.free.push({
             number: i,
             index: i,
-            jobsDone: [], // indexes of jobs done
+            jobsDone: [] // indexes of jobs done
         });
     }
 }
@@ -53,16 +53,19 @@ JobQueue.prototype._popThread = function (type) {
 
     if (type === 'busy') {
         result = this.threads.busy[0];
-        this.threads.busy[0] = this.threads.busy[this.threads.busy.length - 1];
-        this.threads.busy.pop();
-        this._siftDown('busy', 0);
+
+        if (result) {
+            this.threads.busy[0] = this.threads.busy[this.threads.busy.length - 1];
+            this.threads.busy.pop();
+            this._siftDownBusy(0);
+        }
     } else if (type === 'free') {
         result = this.threads.free[0];
 
         if (result) {
             this.threads.free[0] = this.threads.free[this.threads.free.length - 1];
             this.threads.free.pop();
-            this._siftDown('free', 0);
+            this._siftDownFree(0);
         }
     }
 
@@ -98,49 +101,18 @@ JobQueue.prototype._siftUpBusy = function (index) {
     }
 };
 
-JobQueue.prototype._siftDown = function (type, index) {
+JobQueue.prototype._siftDownFree = function (index) {
     var maxIndex = index;
-    var leftChildIndex;
-    var rightChildIndex;
-    var size;
-    var queue;
-    var currEndingTick;
-    var leftEndingTick;
-    var rightEndingTick;
+    var leftChildIndex = this._leftChild(index);
+    var rightChildIndex = this._rightChild(index);
+    var size = this.threads.free.length;
+    var queue = this.threads.free;
 
-    if (type === 'busy') {
-        size = this.threads.busy.length;
-        queue = this.threads.busy;
-        leftChildIndex = this._leftChild(index);
-        rightChildIndex = this._rightChild(index);
-
-        if (leftChildIndex < size && leftEndingTick < currEndingTick) {
-            currEndingTick = queue[maxIndex].currentJob.endingTick;
-            leftEndingTick = queue[leftChildIndex].currentJob.endingTick;
-            maxIndex = leftChildIndex;
-        }
-        if (rightChildIndex < size && rightEndingTick < currEndingTick) {
-            currEndingTick = queue[maxIndex].currentJob.endingTick;
-            rightEndingTick = queue[rightChildIndex].currentJob.endingTick;
-            maxIndex = rightChildIndex;
-        }
-
-    } else if (type === 'free') {
-        size = this.threads.free.length;
-        queue = this.threads.free;
-
-        if (size) {
-            leftChildIndex = this._leftChild(this.threads.free[index].index);
-            rightChildIndex = this._rightChild(this.threads.free[index].index);
-        }
-
-        if (leftChildIndex < size && queue[leftChildIndex] > queue[maxIndex]) {
-            maxIndex = leftChildIndex;
-        }
-        if (rightChildIndex < size && queue[rightChildIndex] > queue[maxIndex]) {
-            maxIndex = rightChildIndex;
-        }
-
+    if (leftChildIndex < size && queue[leftChildIndex].number < queue[maxIndex].number) {
+        maxIndex = leftChildIndex;
+    }
+    if (rightChildIndex < size && queue[rightChildIndex].number < queue[maxIndex].number) {
+        maxIndex = rightChildIndex;
     }
 
     if (index !== maxIndex) {
@@ -148,11 +120,33 @@ JobQueue.prototype._siftDown = function (type, index) {
         queue[index] = queue[maxIndex];
         queue[maxIndex] = tmp;
 
-        if (type === 'busy') {
-            this._siftDown('busy', maxIndex);
-        } else if (type === 'free') {
-            this._siftDown('free', maxIndex);
-        }
+        this._siftDownFree(maxIndex);
+    }
+};
+
+JobQueue.prototype._siftDownBusy = function (index) {
+    var maxIndex = index;
+    var leftChildIndex = this._leftChild(index);
+    var rightChildIndex = this._rightChild(index);
+    var size = this.threads.busy.length;
+    var queue = this.threads.busy;
+    var currEndingTick = queue[maxIndex] ? queue[maxIndex].currentJob.endingTick : null;
+    var leftEndingTick = queue[leftChildIndex] ? queue[leftChildIndex].currentJob.endingTick : null;
+    var rightEndingTick = queue[rightChildIndex] ? queue[rightChildIndex].currentJob.endingTick : null;
+
+    if (leftChildIndex < size && leftEndingTick < currEndingTick) {
+        maxIndex = leftChildIndex;
+    }
+    if (rightChildIndex < size && rightEndingTick < currEndingTick) {
+        maxIndex = rightChildIndex;
+    }
+
+    if (index !== maxIndex) {
+        var tmp = queue[index];
+        queue[index] = queue[maxIndex];
+        queue[maxIndex] = tmp;
+
+        this._siftDownBusy(maxIndex);
     }
 }
 
@@ -166,15 +160,30 @@ JobQueue.prototype.isJobCompleted = function () {
     }
 }
 
+JobQueue.prototype.isBusy = function () {
+    return this.threads.busy.length;
+}
+
 JobQueue.prototype.isThreadAvailable = function () {
     return this.threads.free.length;
+}
+
+JobQueue.prototype.waitNextReady = function () {
+    while (this.tick < this.threads.busy[0].currentJob.endingTick) {
+        this.incrementTimer(1);
+    }
 }
 
 // TESTING ########################################################################################
 
 // var jobs = [1, 2, 3, 4, 5];
-var jobs = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
-var queue = new JobQueue(4, jobs);
+// var queue = new JobQueue(2, jobs);
+
+// var jobs = [1, 2, 3, 4, 5, 6, 7, 8];
+// var queue = new JobQueue(3, jobs);
+
+// var jobs = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+// var queue = new JobQueue(4, jobs);
 
 for (var i = 0; i < jobs.length; i++) {
 
@@ -182,8 +191,11 @@ for (var i = 0; i < jobs.length; i++) {
         continue;
     }
 
-    while (queue.isJobCompleted()) {
-        queue.releaseThread();
+    if (queue.isBusy()) {
+        queue.waitNextReady();
+        while (queue.isJobCompleted()) {
+            queue.releaseThread();
+        }
     }
 
     while (queue.isThreadAvailable()) {
