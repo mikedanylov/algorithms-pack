@@ -173,7 +173,7 @@ JobQueue.prototype.waitNextReady = function () {
     }
 }
 
-JobQueue.prototype.printLogsStdout = function () {
+JobQueue.prototype.printLogs = function () {
     this.logs.forEach(function (entry) {
         console.log(entry.thread + ' ' + entry.startTime);
     });
@@ -213,5 +213,33 @@ JobQueue.prototype.startWork = function () {
 
 // TESTING ########################################################################################
 
-queue.startWork();
-queue.printLogsStdout();
+var readline = require('readline');
+var rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+    terminal: false
+});
+var lineNum = 0;
+var queue;
+var threads;
+var jobs;
+
+rl.on('line', function(line){
+
+    if (lineNum === 0) {
+        threads = parseInt(line.split(' ')[0]);
+    }
+
+    if (lineNum === 1) {
+        jobs = line.split(' ').map(function (job) {
+            return parseInt(job);
+        });
+
+        queue = new JobQueue(threads, jobs);
+        queue.startWork();
+        queue.printLogs();
+
+        process.exit();
+    }
+    lineNum++;
+})
