@@ -243,7 +243,7 @@ rl.on('line', function(line){
 
     if (lineNum === 0) {
         threads = parseInt(line.split(' ')[0]);
-    } else {
+    } else if (lineNum === 1) {
         jobs = line.split(' ').map(function (job) {
             return parseInt(job);
         });
