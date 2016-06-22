@@ -16,6 +16,11 @@ function JobQueue(nThreads, jobsArr) {
 }
 
 JobQueue.prototype.assignJob = function (jobIndex) {
+    if (!this.jobs[jobIndex]) {
+        this.writeLogEntry(this.threads.free[0].number, this.tick);
+        return;
+    }
+
     var thread = this._popThread('free');
 
     if (thread) {
@@ -32,15 +37,19 @@ JobQueue.prototype.releaseThread = function () {
 JobQueue.prototype._pushThread = function (type, thread) {
     if (type === 'busy') {
         this.threads.busy.push(thread);
-        this.logs.push({
-            thread: thread.number,
-            startTime: this.tick
-        });
+        this.writeLogEntry(thread.number, this.tick);
         this._siftUpBusy(this.threads.busy.length - 1);
     } else if (type === 'free') {
         // thread.index = this.threads.free.length;
         this.threads.free.push(thread);
     }
+};
+
+JobQueue.prototype.writeLogEntry = function (threadPrio, startTime) {
+    this.logs.push({
+        thread: threadPrio,
+        startTime: startTime
+    });
 };
 
 JobQueue.prototype._popThread = function (type) {
@@ -143,16 +152,23 @@ JobQueue.prototype._siftDownBusy = function (index) {
     // if there is no single faster thread
     // check threads priority
     if (leftChild && leftChild.endingTick < currElement.endingTick) {
-        if (rightChild && rightChild.endingTick < leftChild.endingTick) {
-            nextIndex = rightChildIndex;
-        } else if (rightChild && rightChild.endingTick === leftChild.endingTick) {
-            if (leftChild.number < rightChild.number) {
-                nextIndex = leftChildIndex;
-            } else {
-                nextIndex = rightChildIndex;
-            }
-        }else {
+        nextIndex = leftChildIndex;
+    } else if (leftChild && leftChild.endingTick === currElement.endingTick && leftChild.number < currElement.number) {
+        nextIndex = leftChildIndex;
+    }
+
+    if (rightChild && rightChild.endingTick < currElement.endingTick) {
+        nextIndex = rightChildIndex;
+    } else if (rightChild && rightChild.endingTick === currElement.endingTick && rightChild.number < currElement.number) {
+        nextIndex = rightChildIndex;
+    }
+
+    if (leftChild && rightChild && leftChild.endingTick === rightChild.endingTick &&
+        leftChild.number < currElement.number && rightChild.number < currElement.number) {
+        if (leftChild.number < rightChild.number) {
             nextIndex = leftChildIndex;
+        } else if (rightChild.number < leftChild.number) {
+            nextIndex = rightChildIndex;
         }
     }
 
@@ -162,6 +178,16 @@ JobQueue.prototype._siftDownBusy = function (index) {
         this.threads.busy[nextIndex] = tmp;
         this._siftDownBusy(nextIndex);
     }
+};
+
+JobQueue.prototype.getFasterThreadIndex = function (threads) {
+    var fasterThreadIndex = threads[0].endingTick;
+    threads.forEach(function(thread, index) {
+        if (thread.endingTick < fasterThreadIndex) {
+            fasterThreadIndex = thread.endingTick;
+        }
+    });
+    return fasterThreadIndex;
 };
 
 JobQueue.prototype.incrementTimer = function (inc) {
@@ -200,7 +226,7 @@ JobQueue.prototype.startWork = function () {
 
     for (var i = 0; i < jobs.length; i++) {
 
-        if (jobs[i] === 0) {
+        if (jobs[i] === -1) {
             continue;
         }
 
@@ -211,11 +237,11 @@ JobQueue.prototype.startWork = function () {
             }
         }
 
-        while (queue.isThreadAvailable() && jobs[i]) {
+        while (queue.isThreadAvailable() && jobs[i] !== -1) {
             for (var j = i; j < jobs.length; j++) {
-                if (jobs[j] && queue.isThreadAvailable()) {
+                if (jobs[j] !== -1 && queue.isThreadAvailable()) {
                     queue.assignJob(j);
-                    jobs[j] = 0;
+                    jobs[j] = -1;
                 } else {
                     break;
                 }
@@ -243,7 +269,7 @@ rl.on('line', function(line){
 
     if (lineNum === 0) {
         threads = parseInt(line.split(' ')[0]);
-    } else if (lineNum === 1) {
+    } else {
         jobs = line.split(' ').map(function (job) {
             return parseInt(job);
         });
