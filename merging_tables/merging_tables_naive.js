@@ -7,6 +7,9 @@
  *  ...
  * ];
  */
+var start = (new Date()).getTime();
+var end;
+
 var tables = [];
 var nTables = 0;
 var nMerges = 0;
@@ -97,8 +100,12 @@ rl.on('line', function (line) {
     lineNum++;
 
     if (lineNum > nMerges + 2) {
-        console.log('All merged!');
-        console.log(JSON.stringify(tables));
+
+        // measure execution time
+        end = (new Date()).getTime();
+        console.log('Time: ' + ((end - start) / 1000).toString() + ' seconds\n');
+        
+        // console.log(JSON.stringify(tables));
         rl.close();
         process.exit(0);
     }
