@@ -18,7 +18,8 @@ var maxRows = 0;
 var readline = require('readline');
 var rl = readline.createInterface({
     input: process.stdin,
-    output: process.stdout
+    output: process.stdout,
+    terminal: false
 });
 var lineNum = 1;
 
@@ -26,7 +27,6 @@ rl.on('line', function (line) {
     
     // number of tables and number of merge operations
     if (lineNum === 1) {
-        // console.log('Line 1: ' + line);
 
         if (!line || !line.length || !line.split(' ').length > 1) {
             rl.close();
@@ -35,14 +35,10 @@ rl.on('line', function (line) {
 
         nTables = parseInt(line.split(' ')[0]);
         nMerges = parseInt(line.split(' ')[1]);
-
-        // console.log('nTables: ' + nTables);
-        // console.log('nMerges: ' + nMerges);
     }
 
     // number of rows in each tables
     if (lineNum === 2) {
-        // console.log('Line 2: ' + line);
 
         if (!line || !line.length) {
             rl.close();
@@ -62,13 +58,10 @@ rl.on('line', function (line) {
                 rows    : nrowsInt
             });
         });
-
-        // console.log('tables: ' + JSON.stringify(tables));
     }
 
     // the rest of lines are each merge operation description
     if (lineNum > 2) {
-        // console.log('Line ' + lineNum + ': ' + line);
 
         if (!line || !line.length || !line.split(' ').length > 1) {
             rl.close();
@@ -80,13 +73,8 @@ rl.on('line', function (line) {
         var source = parseInt(line.split(' ')[1]);
 
         // find a table with data for both source and destination
-        // console.log('source: ' + JSON.stringify(source));
         source = traverseLink(source, tables);
-        // console.log('source: ' + JSON.stringify(source));
-
-        // console.log('destination: ' + JSON.stringify(destination));
         destination = traverseLink(destination, tables);
-        // console.log('destination: ' + JSON.stringify(destination));
 
         // merge tables
         if (source !== destination) {
@@ -103,9 +91,8 @@ rl.on('line', function (line) {
 
         // measure execution time
         end = (new Date()).getTime();
-        console.log('Time: ' + ((end - start) / 1000).toString() + ' seconds\n');
-        
-        // console.log(JSON.stringify(tables));
+        console.log('\nTime: ' + ((end - start) / 1000).toString() + ' seconds\n');
+
         rl.close();
         process.exit(0);
     }
@@ -117,17 +104,16 @@ rl.on('line', function (line) {
  */
 function traverseLink (index, tables) {
     var initial = index;
+    var pathTables = [];
 
     while (tables[index - 1].symlink >= 0) {
-        // console.log(JSON.stringify(tables[index - 1]));
-        // console.log('           |');
-        // console.log('           v');
+        pathTables.push(index);
         index = tables[index - 1].symlink;
     }
 
-    if (initial !== index) {
-        // console.log(JSON.stringify(tables[index - 1]));
-    }
+    pathTables.forEach(function (tablesIndex) {
+        tables[tablesIndex - 1].symlink = index;
+    });
 
     return index;
 }
