@@ -6,7 +6,7 @@ import fs = require('fs');
 export class TestGenerator {
     numOps: number;
     ops = ['add', 'del', 'find'];
-    maxPhoneNumber = 30;
+    maxPhoneNumber = 100;
     maxNameLength = 15;
 
     public constructor () {
@@ -72,4 +72,4 @@ export class TestGenerator {
 
 let test = new TestGenerator();
 
-test.generateTests(fs, 1, 100000);
+test.generateTests(fs, 10, 100000);
