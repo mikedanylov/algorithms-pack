@@ -1,2 +1,8 @@
-# freecodecamp-algorithms-pack-js
-Small algorithmic problems of all levels written in JavaScript
+# algorithms-pack
+Different algorithmic problems
+
+### List of problems solved
+- mergin tables (path compression)
+- job queue (priority queues)
+- build heap (generate heap datastructure)
+- check brackets in code (stack)
