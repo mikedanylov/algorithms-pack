@@ -7,3 +7,4 @@ Different algorithmic problems
 - build heap (generate heap datastructure)
 - check brackets in code (stack)
 - phone book (direct addresing with two maps)
+- hash chains (hash table using the chaining scheme)
