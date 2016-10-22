@@ -1,7 +1,4 @@
-/**
- * Created by mikedanylov on 10/8/16.
- */
-import fs = require('fs');
+import * as fs from 'fs';
 
 export class TestGenerator {
     numOps: number;
@@ -56,7 +53,7 @@ export class TestGenerator {
         return this.ops[Math.floor(Math.random() * this.ops.length)];
     }
 
-    public generateTests (fsObj: fs, nFiles: number, nOperations: number): void {
+    public generateTests (nFiles: number, nOperations: number): void {
         for (let i = 0; i < nFiles; i++) {
             let fileNumber = i + 1;
             fs.writeFile('tests/' + fileNumber.toString(),
@@ -71,5 +68,4 @@ export class TestGenerator {
 
 
 let test = new TestGenerator();
-
-test.generateTests(fs, 10, 100000);
+test.generateTests(10, 100000);
