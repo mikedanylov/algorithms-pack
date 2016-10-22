@@ -9,10 +9,23 @@ let textLine: string;
 export class PatterFinder {
     private pattern: string;
     private text: string;
+    private matches: Array<number> = [];
 
     public constructor(pattern: string, text: string) {
         this.pattern = pattern;
         this.text = text;
+    }
+
+    public find() {
+        for (let i = 0; i <= this.text.length - this.pattern.length; i++) {
+            if (this.pattern === this.text.substring(i, i + this.pattern.length)) {
+                this.matches.push(i);
+            }
+        }
+    }
+
+    public getMatches(): string {
+        return this.matches.join(' ').trim();
     }
 }
 
@@ -45,8 +58,8 @@ rl.on('line', function (line: string) {
 
         //find pattern in text
         let patterFinder = new PatterFinder(patternLine, textLine);
-        // patterFinder.find();
-        // patterFinder.print();
+        patterFinder.find();
+        console.log(patterFinder.getMatches());
 
         // measure execution time
         end = (new Date()).getTime();
